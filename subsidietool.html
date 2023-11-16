@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Subsidie Rekentool</title>
+<style>
+    /* Tooltip CSS */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltip-text {
+      display: none;
+      position: absolute;
+      background-color: #000;
+      color: #fff;
+      padding: 5px;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    .tooltip:hover .tooltip-text {
+      display: block;
+    }
+
+    /* Rest of the Tool CSS */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      max-width: 400px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    select,
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .error-text {
+      color: red;
+      margin-bottom: 10px;
+    }
+
+    .disclaimer-text {
+      font-size: 14px;
+      color: gray;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+<h1>Subsidie Rekentool</h1>
+<div class="form-group">
+<label>
+Subsidievariant:
+</label>
+<select id="subsidievariant">
+<option value="bovengronds">Bovengronds</option>
+<option value="ondergronds">Ondergronds</option>
+<option value="groen_dak">Groen dak</option>
+</select>
+</div>
+<div class="form-group">
+<label>Afgekoppeld oppervlak (in vierkante meters):</label>
+<input type="number" id="oppervlak" min="0" placeholder="Vul het oppervlak in">
+</div>
+<button id="berekenButton">Bereken Subsidie</button>
+<div class="error-text" id="errorText"></div>
+<div class="result" id="resultContainer">
+<span id="indicatie"></span>
+<p class="disclaimer-text" id="disclaimerText"></p>
+</div>
+<button id="resetButton">Reset</button>
+</div>
+<script>
+    document.getElementById("berekenButton").addEventListener("click", calculateSubsidie);
+    document.getElementById("resetButton").addEventListener("click", resetForm);
+
+    function calculateSubsidie() {
+      var oppervlak = parseFloat(document.getElementById("oppervlak").value);
+      var subsidievariant = document.getElementById("subsidievariant").value;
+      var indicatie = 0;
+      var errorText = "";
+      var disclaimerText = "";
+
+      if (subsidievariant === "bovengronds" || subsidievariant === "ondergronds") {
+        if (oppervlak < 20) {
+          errorText = '<span class="error-text">Het minimum oppervlak voor deze subsidievariant is 20 vierkante meter.</span>';
+        }
+      } else if (subsidievariant === "groen_dak") {
+        if (oppervlak < 10) {
+          errorText = '<span class="error-text">Het minimum oppervlak voor deze subsidievariant is 10 vierkante meter.</span>';
+        } else {
+          if (oppervlak <= 200) {
+            indicatie = Math.min(oppervlak * 20, 2000);
+          } else {
+            indicatie = Math.min(oppervlak * 20, 7500);
+          }
+          disclaimerText = '<span class="disclaimer-text">Let op! Dit is slechts een indicatie. Na beoordeling van uw aanvraag wordt het bedrag vastgesteld.</span>';
+        }
+      }
+
+      if (errorText === "") {
+        if (oppervlak >= 20) {
+          if (subsidievariant === "bovengronds") {
+            if (oppervlak <= 200) {
+              indicatie = Math.min(oppervlak * 5, 300);
+            } else {
+              indicatie = Math.min(oppervlak * 5, 5000);
+            }
+          } else if (subsidievariant === "ondergronds") {
+            if (oppervlak <= 200) {
+              indicatie = Math.min(oppervlak * 10, 600);
+            } else {
+              indicatie = Math.min(oppervlak * 10, 10000);
+            }
+          }
+          disclaimerText = '<span class="disclaimer-text">Let op! Dit is slechts een indicatie. Na beoordeling van uw aanvraag wordt het bedrag vastgesteld.</span>';
+        }
+      }
+
+      document.getElementById("indicatie").innerHTML = indicatie !== 0 ? "Indicatie: " + indicatie + " euro" : "";
+      document.getElementById("errorText").innerHTML = errorText;
+      document.getElementById("disclaimerText").innerHTML = errorText === "" ? disclaimerText : "";
+    }
+
+    function resetForm() {
+      document.getElementById("oppervlak").value = "";
+      document.getElementById("indicatie").innerHTML = "";
+      document.getElementById("errorText").innerHTML = "";
+      document.getElementById("disclaimerText").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
